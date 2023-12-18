@@ -37,4 +37,4 @@ jobs:
       run: nx test proyecto001
 
     - name: Run Build
-      run: npm run build
+      run: nx build proyecto001
