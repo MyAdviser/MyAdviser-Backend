@@ -23,6 +23,9 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
+        
+    - name: Install Nx
+      run: npm install -g @nrwl/cli
 
     - name: Directory Proyect
       run: cd ./apps/proyecto001
