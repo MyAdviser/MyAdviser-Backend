@@ -27,7 +27,10 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-        
+
+    - name: Directory Proeyct
+      run: cd ./apps/proyecto001
+
     - name: Install Deps
       run: npm install
       
