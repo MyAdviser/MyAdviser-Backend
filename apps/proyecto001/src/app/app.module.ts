@@ -1,5 +1,8 @@
 import { Module  } from '@nestjs/common';
+import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { UsuariosModule } from './modules/usuarios/usuarios.module';
 
 @Module({
   imports: [
@@ -13,6 +16,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       synchronize: process.env.NODE_ENV != 'prod',
       logging: process.env.NODE_ENV !== 'prod',
       //entities : []
+    }),
+    UsuariosModule,
+    GraphQLModule.forRoot<ApolloDriverConfig>({
+      driver:ApolloDriver,
+      autoSchemaFile:true,
     }),
   ],
   controllers: [],
