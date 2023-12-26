@@ -1,30 +1,33 @@
 import { Module  } from '@nestjs/common';
+import { EstudiantesModule } from './modules/estudiantes/estudiantes.module';
+import Database from './db';
 import { GraphQLModule } from '@nestjs/graphql';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-import { UsuariosModule } from './modules/usuarios/usuarios.module';
+import Universidad from './modules/universidades/entities/universidade.entity';
+import { ProfesionesModule } from './modules/profesiones/profesiones.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: process.env.DB_HOST,
-      port: +process.env.DB_PORT,
-      username: process.env.DB_USERNAME,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
-      synchronize: process.env.NODE_ENV != 'prod',
-      logging: process.env.NODE_ENV !== 'prod',
-      //entities : []
-    }),
-    UsuariosModule,
+    EstudiantesModule,
+    Universidad,
+    ProfesionesModule,
     GraphQLModule.forRoot<ApolloDriverConfig>({
-      driver:ApolloDriver,
-      autoSchemaFile:true,
+      installSubscriptionHandlers: true,
+      driver: ApolloDriver,
+      autoSchemaFile: true
     }),
   ],
   controllers: [],
-  providers: []
+  providers: [Database,AppModule]
 })
 export class AppModule  {
+  db:Database
+
+  constructor() {
+    this.db = new Database()
+  }
+
+  async startServer() {
+    await this.db.connect()
+  }
 };
