@@ -3,7 +3,7 @@ import { DataSource } from 'typeorm'
 import { dbConfig } from '../config/configEnv'
 import logger from '../utils/logger'
 import { isDev } from '../utils/constants';
-import { entities } from 'app/Entities';
+import { entities } from '../Entities';
 
 export const AppDataSource = new DataSource({
    logging: isDev,
@@ -14,7 +14,7 @@ export const AppDataSource = new DataSource({
    username: dbConfig.username,
    password: dbConfig.password,
    database:dbConfig.database,
-   entities:entities
+   entities:entities,
 })
 
 export default class Database {

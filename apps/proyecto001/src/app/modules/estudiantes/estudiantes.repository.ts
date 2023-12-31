@@ -1,4 +1,4 @@
-import { AppDataSource } from "app/db";
+import { AppDataSource } from "../../db/index";
 import Estudiante from "./entities/estudiante.entity";
 
 export const EstudianteRepository = AppDataSource.getRepository(Estudiante).extend({
@@ -16,3 +16,4 @@ export const EstudianteRepository = AppDataSource.getRepository(Estudiante).exte
       ).then((data): number => data?.pop()?.id);
    },
 })
+

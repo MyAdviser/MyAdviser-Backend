@@ -75,6 +75,10 @@ export default class Estudiante {
    @Column()
 	PASSWORD_ESTUDIANTE:string
 
+   @Field(()=>Boolean)
+   @Column()
+	VERIFICACION?:boolean = false
+
    @Field(()=>Int)
    @Column()
 	universidad_ID_UNI:number

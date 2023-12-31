@@ -1,20 +1,13 @@
 {
-  "compileOnSave": false,
   "compilerOptions": {
-    "rootDir": ".",
-    "baseUrl": "./apps/proyecto001",
-    "paths": {
-      "*": ["src/*"],
-    },
     "allowJs": true,
     "target": "ES2018",
-    "module": "ESNext",
+    "module": "commonjs",
     "lib": ["dom", "es6", "es2017", "esnext.asynciterable"],
     "skipLibCheck": true,
     "sourceMap": true,
     "outDir": "./build",
     "moduleResolution": "node",
-    "declaration": false,
     "removeComments": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
@@ -29,8 +22,9 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "resolveJsonModule": true,
-    "importHelpers": true,
-    "skipDefaultLibCheck": true
+    "baseUrl": ".",
+    "paths": { "@src/*": ["src/*"] }
   },
-  "exclude": ["node_modules", "tmp"]
+  "exclude": ["node_modules"],
+  "include": ["./src/**/*.ts"]
 }

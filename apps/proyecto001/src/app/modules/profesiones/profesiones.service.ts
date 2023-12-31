@@ -1,23 +1,20 @@
-import { Injectable } from '@nestjs/common';
-import {ProfesionRepository} from './profesiones.repository';
 
-@Injectable()
-export class ProfesionesService {
-  // constructor( private readonly profesionRepository:typeof ProfesionRepository){}
-  constructor( private readonly profesionRepository:typeof ProfesionRepository){}
+import { AppDataSource } from "app/db/index";
+import Profesional from "./entities/profesiones.entity";
 
-  findOne(id:number){
-    try {
-      return this.profesionRepository.find({where:{ID_PROFESION:id}});
-    } catch(error){
-      return error;
-    }
-  }
+export const ProfesionalRepository = AppDataSource.getRepository(Profesional).extend({
+   async newId() {
+      return this.query(
+         `
+         SELECT 
+            (CASE 
+               WHEN MAX(ID_PROFESION) IS NULL
+               THEN 1
+               ELSE MAX(ID_PROFESION) + 1
+            END) AS id
+         FROM PROFESIONAL
+      `
+      ).then((data): number => data?.pop()?.id);
+   },
+})
 
-  setHi(){
-    return 'hola';
-  }
-  async getAllProfesion () {
-    return await this.profesionRepository.find();
-  }
-}

@@ -46,5 +46,9 @@
     ],
     "sharedGlobals": []
   },
-  "nxCloudAccessToken": "NmI3YjRhZWUtNWUxZi00MDBjLWJmYTAtNzY1YWUzYjg5MDI4fHJlYWQtd3JpdGU="
+  "enforce-module-boundaries": [
+    {
+      "allow": ["@app/*"]
+    }
+  ]
 }
