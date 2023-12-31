@@ -1,22 +1,46 @@
 import { Module  } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { EstudiantesModule } from './modules/estudiantes/estudiantes.module';
+import Database from './db';
+import { GraphQLModule } from '@nestjs/graphql';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { ProfesionesModule } from './modules/profesiones/profesiones.module';
+import { UniversidadesModule } from './modules/universidades/universidades.module';
+import { MailerModule } from '@nestjs-modules/mailer';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: process.env.DB_HOST,
-      port: +process.env.DB_PORT,
-      username: process.env.DB_USERNAME,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
-      synchronize: process.env.NODE_ENV != 'prod',
-      logging: process.env.NODE_ENV !== 'prod',
-      //entities : []
+    EstudiantesModule,
+    UniversidadesModule,
+    ProfesionesModule,
+    GraphQLModule.forRoot<ApolloDriverConfig>({
+      installSubscriptionHandlers: true,
+      driver: ApolloDriver,
+      autoSchemaFile: true
     }),
+    MailerModule.forRoot({
+      transport : {
+        service: "gmail",
+        auth: {
+          type: "OAuth2",
+          user: process.env.EMAIL,
+          clientId: process.env.MAILING_ID,
+          clientSecret: process.env.MAILING_SECRET,
+          refreshToken: process.env.MAILING_REFRESH,
+        }
+      }
+     })
   ],
   controllers: [],
-  providers: []
+  providers: [Database]
 })
 export class AppModule  {
+  db:Database
+
+  constructor() {
+    this.db = new Database()
+  }
+
+  async startServer() {
+    await this.db.connect()
+  }
 };
