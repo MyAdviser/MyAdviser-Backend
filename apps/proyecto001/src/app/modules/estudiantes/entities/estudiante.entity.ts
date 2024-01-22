@@ -20,7 +20,7 @@ export default class Estudiante {
 
    @Field(()=>Int)
    @PrimaryColumn()
-   ID_ESTUDIANTE?:number
+   ID_ESTUDIANTE:number
 
    @Field(()=>String)
    @Column()

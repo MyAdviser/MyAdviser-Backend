@@ -1,4 +1,4 @@
-import { Resolver, ObjectType, Field,Mutation,Args, Context} from '@nestjs/graphql';
+import { Resolver, ObjectType, Field,Mutation,Args} from '@nestjs/graphql';
 import Estudiante from './entities/estudiante.entity';
 import FieldError from '../FieldError/FielError';
 import { EstudianteRepository } from './estudiantes.repository';
@@ -10,12 +10,10 @@ import { EmailTestVerification } from 'app/utils/emailTestVerification';
 import { MailerService } from '@nestjs-modules/mailer';
 import { sendVerificationEmail } from 'app/mail';
 import { generateToken } from 'app/helpers/tokens';
-import jwt, { JwtPayload } from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
-import { HttpStatus } from '@nestjs/common';
-import { ApolloContext } from 'app/interface';
-import { UseMiddleware } from 'type-graphql';
-import { isAuth } from 'app/middleware/isAuth';
+import { LoginEstudianteInput } from './dto/login-estudiante.input';
+import { setError } from 'app/utils/setError';
+import { genJWT } from 'app/utils/jwt';
 
 @ObjectType()
 class EstudianteResponseCreate {
@@ -30,13 +28,27 @@ class EstudianteResponseCreate {
 
 }
 
+@ObjectType()
+class LoginResponse {
+  @Field(()=>Estudiante, {nullable:true})
+  data?:Estudiante | undefined
+
+  @Field(() => String,{nullable:true})
+  token?: string;
+
+  @Field(() => [FieldError], {nullable:true})
+  errors?: FieldError[]
+}
+
 @Resolver(Estudiante)
 export class EstudiantesResolver {
-  constructor(private readonly mailService: MailerService){}
+  constructor(
+    private readonly mailService: MailerService
+    ){}
   repository = EstudianteRepository
   
   @Mutation(() => EstudianteResponseCreate)
-  async createEstudiante(
+  async registerEstudiante(
     @Args('input', { type: () => CreateEstudianteInput }) input: CreateEstudianteInput
     ): Promise<EstudianteResponseCreate> {
     try {
@@ -81,7 +93,7 @@ export class EstudiantesResolver {
       const url = `${process.env.BASE_URL}/activate/${emailVerificationToken}`;
       const mailOptions = await sendVerificationEmail(CORREO_ESTUDIANTE,NOMBRE_ESTUDIANTE,url);
       await this.mailService.sendMail(mailOptions);
-      return {data:input,token};
+      return {data:{...input,ID_ESTUDIANTE:parseInt(idStudent)},token};
     } catch (error) {
       return {
         errors: [
@@ -94,33 +106,28 @@ export class EstudiantesResolver {
     }
   }
 
-  // esta funcion es cuando el usuaroi este inciado sesion, por lo que se genero el token.
-  @UseMiddleware(isAuth)
-  @Mutation(() => String)
-  async activateAccount(
-    @Args('token', { type: () => String }) token: string,
-    @Context() { req }: ApolloContext
-  ): Promise<string> {
-    try {
-      const id = req.userId;
-      // const user = jwt.verify(token, process.env.TOKEN_SECRET!);
-      const user = jwt.verify(token, process.env.TOKEN_SECRET!) as JwtPayload;
-      const check = await this.repository.find({where:{ID_ESTUDIANTE:id}});
-      if (id !== user.id) {
-        throw { message: 'No tienes la autorización para completar esta operación.', statusCode: HttpStatus.BAD_REQUEST };
+
+  @Mutation(()=>LoginResponse)
+  async loginEstudiante(
+    @Args('input')input:LoginEstudianteInput 
+  ):Promise<LoginResponse>{
+    try { 
+      const {EMAIL_ESTUDIANTE,PASSWORD} = input;
+      const existUser = await this.repository.find({where:{CORREO_ESTUDIANTE:EMAIL_ESTUDIANTE}}).then((data)=>data?.pop());
+      if(!existUser) return setError('LOGIN','El correo o la contraseña son incorrectos.');
+      const isSamePass = await bcrypt.compareSync(PASSWORD,existUser.PASSWORD_ESTUDIANTE);
+      if(!isSamePass) return setError('LOGIN','El contraseña son incorrectos.');
+      const token = await genJWT(existUser.ID_ESTUDIANTE);
+      return {data:{...existUser, PASSWORD_ESTUDIANTE:''},token}
+    } catch(error){
+      return {
+        errors : [
+          {
+            field:'LOGIN',
+            message:'Contacte con el administrador.'
+          }
+        ]
       }
-      const verification = check.map(i => i.VERIFICACION)
-      if (verification) {
-        throw { message: 'This email is already activated.', statusCode: HttpStatus.BAD_REQUEST };
-      } else {
-        if (id !== undefined) {
-          await this.repository.update(id, { VERIFICACION: true });
-        }
-        return 'Account has been activated successfully.';
-      }
-    } catch (error) {
-      throw { message: error.message, statusCode: HttpStatus.INTERNAL_SERVER_ERROR };
     }
   }
-
 }

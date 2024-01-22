@@ -1,5 +1,5 @@
 import 'reflect-metadata'
-import { Logger } from '@nestjs/common';
+import { Logger, ValidationPipe  } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app/app.module';
 import moduleAlias from 'module-alias';
@@ -9,14 +9,16 @@ async function bootstrap() {
 
   moduleAlias.addAlias('@src', __dirname)
   const app = await NestFactory.create(AppModule);
+  
+  app.useGlobalPipes(new ValidationPipe());
+  
   app.use(cors({
     origin: process.env.DIRECTION_WEB,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   }));
   // connectdb
-  const server = new AppModule();
-  await server.startServer();
+  await app.get(AppModule).startServer();
 
   //start server
   const port = process.env.PORT || 3000;
