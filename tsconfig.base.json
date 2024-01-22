@@ -1,20 +1,30 @@
 {
-  "compileOnSave": false,
   "compilerOptions": {
-    "rootDir": ".",
+    "allowJs": true,
+    "target": "ES2018",
+    "module": "commonjs",
+    "lib": ["dom", "es6", "es2017", "esnext.asynciterable"],
+    "skipLibCheck": true,
     "sourceMap": true,
-    "declaration": false,
+    "outDir": "./build",
     "moduleResolution": "node",
+    "removeComments": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "noImplicitThis": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "importHelpers": true,
-    "target": "es2015",
-    "module": "esnext",
-    "lib": ["es2020", "dom"],
-    "skipLibCheck": true,
-    "skipDefaultLibCheck": true,
+    "resolveJsonModule": true,
     "baseUrl": ".",
-    "paths": {}
+    "paths": { "@src/*": ["src/*"] }
   },
-  "exclude": ["node_modules", "tmp"]
+  "exclude": ["node_modules"],
+  "include": ["./src/**/*.ts"]
 }
